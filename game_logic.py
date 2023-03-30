@@ -1,5 +1,6 @@
-import pygame
 import random
+from time import sleep
+import pygame
 
 # Initialize Pygame
 pygame.init()
@@ -43,13 +44,24 @@ enemy_x = window_width
 enemy_y = random.randint(0, window_height - 96)
 
 # Set the enemy speed
-enemy_speed = 5
+enemy_speed = 1
+
+# Set the player speed
+player_speed = 1
 
 # Set the score
 score = 0
 
+# Set the clock
+clock = pygame.time.Clock()
+FRAMERATE = 30
+dt = 1
+
 # The game loop
 while True:
+    # Calculate the time since the last frame
+    dt = clock.tick(FRAMERATE) / 5
+
     # Handle events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -59,25 +71,26 @@ while True:
     # Move the player
     keys = pygame.key.get_pressed()
     if keys[pygame.K_UP]:
-        player_y -= 5
+        player_y -= player_speed * dt
         player = player_image
     if keys[pygame.K_DOWN]:
-        player_y += 5
+        player_y += player_speed * dt
         player = player_image
     if keys[pygame.K_LEFT]:
-        player_x -= 5
+        player_x -= player_speed * dt
         player = player_side_image
     if keys[pygame.K_RIGHT]:
-        player_x += 5
+        player_x += player_speed * dt
         player = pygame.transform.flip(player_side_image, True, False)
     # Move the enemy
-    enemy_x -= enemy_speed
-
+    enemy_x -= enemy_speed * dt
+    
     # Check if the enemy is off the screen
     if enemy_x < -96:
         enemy_x = window_width
         enemy_y = random.randint(0, window_height - 96)
         score += 1
+        enemy_speed += 0.1
 
     # Check for collisions
     if all([(player_x + 96 > enemy_x),
@@ -86,6 +99,7 @@ while True:
             (player_y < enemy_y + 96)]
         ):
         score = 0
+        enemy_speed = 1
 
     # Draw the background
     screen.blit(background_image, (0, 0))
