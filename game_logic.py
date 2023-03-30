@@ -1,21 +1,20 @@
 import random
-from time import sleep
 import pygame
 
 # Initialize Pygame
 pygame.init()
 
 # Set the window dimensions
-window_width = 1000
-window_height = 533
+WINDOW_WIDTH = 1000
+WINDOW_HEIGHT = 533
 
 # Create the window
-screen = pygame.display.set_mode((window_width, window_height))
+screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 # Set the title of the window
 pygame.display.set_caption("Ninjago vs. Bakugan")
 
-# Define some colors
+# Define some colors for later use
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
@@ -37,11 +36,11 @@ player = player_image
 
 # Set the player position
 player_x = 100
-player_y = window_height / 2
+player_y = WINDOW_HEIGHT / 2
 
 # Set the enemy position
-enemy_x = window_width
-enemy_y = random.randint(0, window_height - 96)
+enemy_x = WINDOW_WIDTH
+enemy_y = random.randint(0, WINDOW_HEIGHT - 96)
 
 # Set the enemy speed
 enemy_speed = 1
@@ -49,8 +48,9 @@ enemy_speed = 1
 # Set the player speed
 player_speed = 1
 
-# Set the score
+# Set the score and level
 score = 0
+level = 1
 
 # Set the clock
 clock = pygame.time.Clock()
@@ -84,12 +84,13 @@ while True:
         player = pygame.transform.flip(player_side_image, True, False)
     # Move the enemy
     enemy_x -= enemy_speed * dt
-    
+
     # Check if the enemy is off the screen
     if enemy_x < -96:
-        enemy_x = window_width
-        enemy_y = random.randint(0, window_height - 96)
+        enemy_x = WINDOW_WIDTH
+        enemy_y = random.randint(0, WINDOW_HEIGHT - 96)
         score += 1
+        level = score // 10 + 1
         enemy_speed += 0.1
 
     # Check for collisions
@@ -99,6 +100,7 @@ while True:
             (player_y < enemy_y + 96)]
         ):
         score = 0
+        level = 1
         enemy_speed = 1
 
     # Draw the background
@@ -111,8 +113,8 @@ while True:
     screen.blit(enemy_image, (enemy_x, enemy_y))
 
     # Draw the score
-    score_text = font.render("Score: " + str(score), True, WHITE)
-    screen.blit(score_text, (window_width / 2 - 50, 10))
+    score_text = font.render(f"Score: {score} | Level: {level}", True, WHITE)
+    screen.blit(score_text, (WINDOW_WIDTH / 2 - 100, 10))
 
     # Update the screen
     pygame.display.update()
