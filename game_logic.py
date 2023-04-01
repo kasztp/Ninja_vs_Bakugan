@@ -1,18 +1,33 @@
+"""
+Game logic for the game.
+"""
+import os
+import sys
 import random
+import yaml
 import pygame
+from utils import load_sprite, load_background, detect_collision, screen_init
+
+# Load config.yaml
+with open(os.path.join("config.yaml"), encoding="utf8") as config_file:
+    CONFIG = yaml.load(config_file, Loader=yaml.SafeLoader)
+
+# Define some constants
+try:
+    WINDOW_WIDTH = CONFIG["resolution"]["horizontal"]
+    WINDOW_HEIGHT = CONFIG["resolution"]["vertical"]
+    TITLE = CONFIG["window_title"]
+    FPS = CONFIG["fps"]
+    MAX_LEVEL = CONFIG["max_level"]
+except KeyError as error:
+    print("Error: Missing key in config.yaml:", error)
+    raise SystemExit from error
 
 # Initialize Pygame
 pygame.init()
 
-# Set the window dimensions
-WINDOW_WIDTH = 1000
-WINDOW_HEIGHT = 533
-
 # Create the window
-screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-
-# Set the title of the window
-pygame.display.set_caption("Ninjago vs. Bakugan")
+screen = screen_init(TITLE, (WINDOW_WIDTH, WINDOW_HEIGHT))
 
 # Define some colors for later use
 BLACK = (0, 0, 0)
@@ -25,28 +40,147 @@ BLUE = (0, 0, 255)
 font = pygame.font.Font(None, 36)
 
 # Load the images
-player_image = pygame.image.load("ninja.png").convert_alpha()
-player_image = pygame.transform.scale(player_image, (96, 96))
-player_side_image = pygame.image.load("ninja_side.png").convert_alpha()
-player_side_image = pygame.transform.scale(player_side_image, (96, 96))
-background_image = pygame.image.load("background.png").convert()
-enemy_image = pygame.image.load("enemy.png").convert_alpha()
-enemy_image = pygame.transform.scale(enemy_image, (96, 96))
-player = player_image
+player_image = load_sprite("ninja.png", (96, 96))
+player_side_image = load_sprite("ninja_side.png", (96, 96))
+enemy_image = load_sprite("enemy.png", (96, 96))
+background_image = load_background("background.png")
+shuriken_image = load_sprite("shuriken.png", (32, 32))
 
-# Set the player position
-player_x = 100
-player_y = WINDOW_HEIGHT / 2
 
-# Set the enemy position
-enemy_x = WINDOW_WIDTH
-enemy_y = random.randint(0, WINDOW_HEIGHT - 96)
+class Player(pygame.sprite.Sprite):
+    """
+    The player class.
+    """
+    def __init__(self, x: int, y: int, speed: int, hp:int, image: pygame.SurfaceType):
+        """
+        Initialize the player.
 
-# Set the enemy speed
-enemy_speed = 1
+        Parameters
+        ----------
+        x : int
+            The x position of the player.
+        y : int
+            The y position of the player.
+        speed : int
+            The speed of the player.
+        hp : int
+            The health of the player.
+        image : pygame.SurfaceType
+            The image of the player.
+        """
+        super().__init__()
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.speed = speed
+        self.hp = hp
 
-# Set the player speed
-player_speed = 1
+    def update(self, keys: list, _dt: float):
+        """
+        Update the player.
+
+        Parameters
+        ----------
+        keys : list
+            The keys that are pressed.
+        """
+        if keys[pygame.K_UP]:
+            self.rect.y -= self.speed * _dt
+            self.image = player_image
+        if keys[pygame.K_DOWN]:
+            self.rect.y += self.speed * _dt
+            self.image = player_image
+        if keys[pygame.K_LEFT]:
+            self.rect.x -= self.speed * _dt
+            self.image = player_side_image
+        if keys[pygame.K_RIGHT]:
+            self.rect.x += self.speed * _dt
+            self.image = pygame.transform.flip(player_side_image, True, False)
+
+
+class Enemy(pygame.sprite.Sprite):
+    """
+    The enemy class.
+    """
+    def __init__(self, x: int, y: int, speed: int, hp: int, image: pygame.SurfaceType):
+        """
+        Initialize the enemy.
+
+        Parameters
+        ----------
+        x : int
+            The x position of the enemy.
+        y : int
+            The y position of the enemy.
+        speed : int
+            The speed of the enemy.
+        hp : int
+            The health of the enemy.
+        image : pygame.SurfaceType
+            The image of the enemy.
+        """
+        super().__init__()
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.speed = speed
+        self.hp = hp
+
+    def update(self, _dt: float):
+        """
+        Update the enemy.
+        """
+        self.rect.x -= self.speed * _dt
+
+
+class Shuriken(pygame.sprite.Sprite):
+    """
+    The shuriken class.
+    """
+    def __init__(self, x: int, y: int, speed: int, image: pygame.SurfaceType):
+        """
+        Initialize the shuriken.
+
+        Parameters
+        ----------
+        x : int
+            The x position of the shuriken.
+        y : int
+            The y position of the shuriken.
+        speed : int
+            The speed of the shuriken.
+        image : pygame.SurfaceType
+            The image of the shuriken.
+        """
+        super().__init__()
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.speed = speed
+        self.shot_time = pygame.time.get_ticks()
+
+    def update(self, _dt: float):
+        """
+        Update the shuriken.
+        """
+        self.rect.x += self.speed * _dt
+
+
+# Create the player
+player = Player(x=100, y=WINDOW_HEIGHT / 2, speed=1, hp=5, image=player_image)
+
+# Create the enemy
+enemy = Enemy(x=WINDOW_WIDTH, y=random.randint(0, WINDOW_HEIGHT - 96),
+              speed=1, hp=2, image=enemy_image)
+
+# Set the shuriken speed
+SHURIKEN_SPEED = 2
+
+# Create the shuriken group
+shurikens = []
 
 # Set the score and level
 score = 0
@@ -54,67 +188,118 @@ level = 1
 
 # Set the clock
 clock = pygame.time.Clock()
-FRAMERATE = 30
 dt = 1
 
 # The game loop
 while True:
     # Calculate the time since the last frame
-    dt = clock.tick(FRAMERATE) / 5
+    dt = clock.tick(FPS) / 5
 
     # Handle events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
-            quit()
+            sys.exit()
 
     # Move the player
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_UP]:
-        player_y -= player_speed * dt
-        player = player_image
-    if keys[pygame.K_DOWN]:
-        player_y += player_speed * dt
-        player = player_image
-    if keys[pygame.K_LEFT]:
-        player_x -= player_speed * dt
-        player = player_side_image
-    if keys[pygame.K_RIGHT]:
-        player_x += player_speed * dt
-        player = pygame.transform.flip(player_side_image, True, False)
+    player.update(keys, dt)
+
     # Move the enemy
-    enemy_x -= enemy_speed * dt
+    enemy.update(dt)
 
     # Check if the enemy is off the screen
-    if enemy_x < -96:
-        enemy_x = WINDOW_WIDTH
-        enemy_y = random.randint(0, WINDOW_HEIGHT - 96)
+    if enemy.rect.x < -96:
+        enemy.kill()
+        enemy = Enemy(x=WINDOW_WIDTH, y=random.randint(0, WINDOW_HEIGHT - 96),
+                      speed=enemy.speed + 0.1, hp=2, image=enemy_image)
         score += 1
         level = score // 10 + 1
-        enemy_speed += 0.1
 
     # Check for collisions
-    if all([(player_x + 96 > enemy_x),
-            (player_x < enemy_x + 96),
-            (player_y + 96 > enemy_y),
-            (player_y < enemy_y + 96)]
-        ):
+    if detect_collision(player, enemy):
         score = 0
         level = 1
-        enemy_speed = 1
+        player.hp -= 1
+        enemy.speed = 1
+        enemy.kill()
+        enemy = Enemy(x=WINDOW_WIDTH, y=random.randint(0, WINDOW_HEIGHT - 96),
+                      speed=enemy.speed, hp=2, image=enemy_image)
+
+    # Check if the player is dead
+    if player.hp <= 0:
+        screen.fill(BLACK)
+        game_over_text = font.render("Game Over", True, RED)
+        screen.blit(game_over_text, (WINDOW_WIDTH / 2 - 60, WINDOW_HEIGHT / 2 - 50))
+        pygame.display.update()
+        pygame.time.delay(5000)
+        pygame.quit()
+        sys.exit()
+
+    # Check if player is shooting a shuriken.
+    # Create a shuriken if there are less than 3 shurikens on the screen
+    if keys[pygame.K_SPACE]:
+        if len(shurikens) < 3:
+            shuriken = Shuriken(x=player.rect.x + 96, y=player.rect.y + 48,
+                                speed=SHURIKEN_SPEED, image=shuriken_image)
+            shurikens.append(shuriken)
+
+    # Move the shurikens
+    shurikens_to_remove = []
+    for idx, shuriken in enumerate(shurikens):
+        shuriken.update(dt)
+        if shuriken.rect.x > WINDOW_WIDTH:
+            shuriken.kill()
+            shurikens_to_remove.append(idx)
+    if len(shurikens_to_remove) > 0:
+        shurikens_to_remove.sort(reverse=True)
+        for idx in shurikens_to_remove:
+            del shurikens[idx]
+
+    # Check for shuriken collisions
+    shurikens_to_remove = []
+    for idx, shuriken in enumerate(shurikens):
+        if detect_collision(shuriken, enemy):
+            enemy.hp -= 1
+            shuriken.kill()
+            shurikens_to_remove.append(idx)
+            if enemy.hp <= 0:
+                enemy.kill()
+                enemy = Enemy(x=WINDOW_WIDTH, y=random.randint(0, WINDOW_HEIGHT - 96),
+                              speed=enemy.speed + 0.1, hp=2, image=enemy_image)
+                score += 1
+                level = score // 10 + 1
+    if len(shurikens_to_remove) > 0:
+        shurikens_to_remove.sort(reverse=True)
+        for idx in shurikens_to_remove:
+            del shurikens[idx]
 
     # Draw the background
     screen.blit(background_image, (0, 0))
 
     # Draw the player
-    screen.blit(player, (player_x, player_y))
+    screen.blit(player.image, (player.rect.x, player.rect.y))
 
     # Draw the enemy
-    screen.blit(enemy_image, (enemy_x, enemy_y))
+    screen.blit(enemy.image, (enemy.rect.x, enemy.rect.y))
+
+    # Draw the shurikens
+    for shuriken in shurikens:
+        screen.blit(shuriken.image, (shuriken.rect.x, shuriken.rect.y))
 
     # Draw the score
-    score_text = font.render(f"Score: {score} | Level: {level}", True, WHITE)
-    screen.blit(score_text, (WINDOW_WIDTH / 2 - 100, 10))
+    score_text = font.render(f"Score: {score} | Level: {level} | HP: {player.hp}", True, WHITE)
+    screen.blit(score_text, (WINDOW_WIDTH / 2 - 150, 10))
+
+    # Check if max level is reached
+    if level == MAX_LEVEL:
+        screen.fill(WHITE)
+        game_over_text = font.render("You Win", True, GREEN)
+        screen.blit(game_over_text, (WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 - 50))
+        pygame.display.update()
+        pygame.time.delay(5000)
+        pygame.quit()
+        sys.exit()
 
     # Update the screen
     pygame.display.update()

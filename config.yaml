@@ -1,0 +1,6 @@
+window_title: "Ninjago vs. Bakugan"
+resolution:
+  horizontal: 1000
+  vertical: 533
+fps: 60
+max_level: 10
