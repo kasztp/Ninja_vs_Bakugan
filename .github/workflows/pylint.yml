@@ -21,4 +21,4 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Analysing the code with pylint
       run: |
-        pylint --unsafe-load-any-extension $(git ls-files '*.py')
+        pylint --unsafe-load-any-extension=true $(git ls-files '*.py')
