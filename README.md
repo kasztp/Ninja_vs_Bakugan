@@ -4,8 +4,10 @@
 ## Simple game experiment with pygame.
 ---
 ## Asset credits:
-* background - https://ninjago.fandom.com/wiki/Ninjago_City?file=Ninjago_city_S8E1.png
+* UI items: Penzilla - https://penzilla.itch.io/basic-gui-bundle
 * ninja_side - https://www.nicepng.com/maxp/u2w7q8w7q8q8u2u2/
 * ninja - https://www.pngwing.com/en/free-png-njcan
 * enemy - https://www.pngegg.com/en/png-nmwne
 * shuriken - https://www.pngegg.com/en/png-zmdjl
+
+Backgrounds generated with: https://creator.nightcafe.studio/

@@ -6,7 +6,7 @@ import sys
 import random
 import yaml
 import pygame
-from utils import load_sprite, load_background, detect_collision, screen_init
+from utils import GameUI, load_sprite, load_backgrounds, detect_collision, screen_init
 
 # Load config.yaml
 with open(os.path.join("config.yaml"), encoding="utf8") as config_file:
@@ -39,11 +39,15 @@ BLUE = (0, 0, 255)
 # Set the font
 font = pygame.font.Font(None, 36)
 
+# Create the game UI
+game_ui = GameUI(screen, font)
+
 # Load the images
 player_image = load_sprite("ninja.png", (96, 96))
 player_side_image = load_sprite("ninja_side.png", (96, 96))
 enemy_image = load_sprite("enemy.png", (96, 96))
-background_image = load_background("background.png")
+background_images = load_backgrounds(MAX_LEVEL)
+background_image = background_images[0]
 shuriken_image = load_sprite("shuriken.png", (32, 32))
 
 
@@ -76,9 +80,9 @@ class Player(pygame.sprite.Sprite):
         self.speed = speed
         self.hp = hp
 
-    def update(self, keys: list, _dt: float):
+    def update_keyboard(self, keys: list, _dt: float):
         """
-        Update the player.
+        Update the player based on keyboard input.
 
         Parameters
         ----------
@@ -97,6 +101,25 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_RIGHT]:
             self.rect.x += self.speed * _dt
             self.image = pygame.transform.flip(player_side_image, True, False)
+    
+    def update_mouse(self, mouse_location: tuple[int, int], _df: float):
+        """
+        Update the player based on mouse input.
+        
+        Parameters
+        ----------
+        mouse_location : tuple[int, int]
+            The location of the mouse.
+        """
+        if mouse_location[0] < self.rect.x:
+            self.image = player_side_image
+        elif mouse_location[0] > self.rect.x:
+            self.image = pygame.transform.flip(player_side_image, True, False)
+        else:
+            self.image = player_image
+
+        self.rect.x = mouse_location[0]
+        self.rect.y = mouse_location[1]
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -172,6 +195,10 @@ class Shuriken(pygame.sprite.Sprite):
 # Create the player
 player = Player(x=100, y=WINDOW_HEIGHT / 2, speed=1, hp=5, image=player_image)
 
+# Set the mouse position to the player position
+pygame.mouse.set_pos(player.rect.x, player.rect.y)
+pygame.mouse.hiding = True
+
 # Create the enemy
 enemy = Enemy(x=WINDOW_WIDTH, y=random.randint(0, WINDOW_HEIGHT - 96),
               speed=1, hp=2, image=enemy_image)
@@ -201,9 +228,14 @@ while True:
             pygame.quit()
             sys.exit()
 
-    # Move the player
+    # Check if the player is moved with keyboard
     keys = pygame.key.get_pressed()
     player.update(keys, dt)
+
+    # Check if the player is moved with mouse
+    if pygame.mouse.get_focused():
+        mouse_location = pygame.mouse.get_pos()
+        player.update_mouse(mouse_location, dt)
 
     # Move the enemy
     enemy.update(dt)
@@ -215,6 +247,7 @@ while True:
                       speed=enemy.speed + 0.1, hp=2, image=enemy_image)
         score += 1
         level = score // 10 + 1
+        background_image = background_images[level - 1]
 
     # Check for collisions
     if detect_collision(player, enemy):
@@ -238,7 +271,7 @@ while True:
 
     # Check if player is shooting a shuriken.
     # Create a shuriken if there are less than 3 shurikens on the screen
-    if keys[pygame.K_SPACE]:
+    if keys[pygame.K_SPACE] or pygame.mouse.get_pressed()[0]:
         if len(shurikens) < 3:
             shuriken = Shuriken(x=player.rect.x + 96, y=player.rect.y + 48,
                                 speed=SHURIKEN_SPEED, image=shuriken_image)
@@ -267,15 +300,23 @@ while True:
                 enemy.kill()
                 enemy = Enemy(x=WINDOW_WIDTH, y=random.randint(0, WINDOW_HEIGHT - 96),
                               speed=enemy.speed + 0.1, hp=2, image=enemy_image)
-                score += 1
+                score += 2
                 level = score // 10 + 1
+                background_image = background_images[level - 1]
     if len(shurikens_to_remove) > 0:
         shurikens_to_remove.sort(reverse=True)
         for idx in shurikens_to_remove:
             del shurikens[idx]
+    
+    # Update the UI
+    game_ui.update_level(level)
+    game_ui.update_score(score)
 
     # Draw the background
     screen.blit(background_image, (0, 0))
+
+    # Draw the UI
+    game_ui.draw(player.hp)
 
     # Draw the player
     screen.blit(player.image, (player.rect.x, player.rect.y))
@@ -286,10 +327,6 @@ while True:
     # Draw the shurikens
     for shuriken in shurikens:
         screen.blit(shuriken.image, (shuriken.rect.x, shuriken.rect.y))
-
-    # Draw the score
-    score_text = font.render(f"Score: {score} | Level: {level} | HP: {player.hp}", True, WHITE)
-    screen.blit(score_text, (WINDOW_WIDTH / 2 - 150, 10))
 
     # Check if max level is reached
     if level == MAX_LEVEL:
