@@ -1,6 +1,6 @@
 window_title: "Ninjago vs. Bakugan"
 resolution:
-  horizontal: 1024
-  vertical: 1024
+  horizontal: 800
+  vertical: 800
 fps: 60
 max_level: 10
