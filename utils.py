@@ -83,7 +83,7 @@ def load_ui_item(name: str, scale: tuple = None) -> pygame.SurfaceType:
     return image
 
 
-def load_backgrounds(how_many_to_load: int) -> list[pygame.SurfaceType]:
+def load_backgrounds(how_many_to_load: int, scale=(WINDOW_WIDTH, WINDOW_HEIGHT)) -> list[pygame.SurfaceType]:
     """
     Load a given nnumber of backgrounds from the backgrounds folder.
 
@@ -103,7 +103,7 @@ def load_backgrounds(how_many_to_load: int) -> list[pygame.SurfaceType]:
     for i in range(how_many_to_load):
         try:
             image = pygame.image.load(os.path.join(bg_path, files[i])).convert()
-            backgrounds.append(image)
+            backgrounds.append(pygame.transform.scale(image, scale))
         except pygame.error as message:
             print("Cannot load image:", files[i])
             raise SystemExit(message) from message
@@ -172,9 +172,9 @@ class GameUI():
             "heart_full": load_ui_item("Icon_Small_HeartFull.png", (32, 32)),
             "heart_empty": load_ui_item("Icon_Small_HeartEmpty.png", (32, 32))
         }
-        self.level_text = self.font.render(f"Level: {self.level}", True, WHITE)
-        self.score_text = self.font.render(f"Score: {self.score}", True, WHITE)
-        self.hp_text = self.font.render("HP: ", True, WHITE)
+        self.level_text = self.font.render(f"Level {self.level}", True, WHITE)
+        self.score_text = self.font.render(f"Score {self.score}", True, WHITE)
+        self.hp_text = self.font.render("HP ", True, WHITE)
 
     def draw(self, player_hp: int):
         """
@@ -189,16 +189,16 @@ class GameUI():
         pygame.draw.rect(self.screen, (139, 69, 19), (0, 0, WINDOW_WIDTH, 50))
 
         # Draw the HP bar
-        self.screen.blit(self.hp_text, (30, 9))
+        self.screen.blit(self.hp_text, (30, 7))
         for i in range(self.max_hp):
             if i < player_hp:
                 self.screen.blit(self.ui_elements["heart_full"], (130 + i * 32, 8))
             else:
                 self.screen.blit(self.ui_elements["heart_empty"], (130 + i * 32, 8))
         # Draw the score
-        self.screen.blit(self.score_text, (WINDOW_WIDTH - 200, 9))
+        self.screen.blit(self.score_text, (WINDOW_WIDTH - 200, 7))
         # Draw the level
-        self.screen.blit(self.level_text, (WINDOW_WIDTH - 400, 9))
+        self.screen.blit(self.level_text, (WINDOW_WIDTH - 400, 7))
 
     def update_score(self, score: int):
         """
@@ -210,7 +210,7 @@ class GameUI():
             The new score.
         """
         self.score = score
-        self.score_text = self.font.render(f"Score: {self.score}", True, WHITE)
+        self.score_text = self.font.render(f"Score {self.score}", True, WHITE)
 
     def update_level(self, level: int):
         """
@@ -222,7 +222,7 @@ class GameUI():
             The new level.
         """
         self.level = level
-        self.level_text = self.font.render(f"Level: {self.level}", True, WHITE)
+        self.level_text = self.font.render(f"Level {self.level}", True, WHITE)
 
 
 class MenuScreen():

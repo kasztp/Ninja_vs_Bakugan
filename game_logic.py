@@ -4,6 +4,7 @@ Game logic for the game.
 import os
 import sys
 import random
+from datetime import datetime
 import yaml
 import pygame
 from utils import (
@@ -185,7 +186,7 @@ if __name__ == "__main__":
     screen = screen_init("Ninja vs. Bakugan", (WINDOW_WIDTH, WINDOW_HEIGHT))
 
     # Set the font
-    font = pygame.font.SysFont("Arial", 36)
+    font = pygame.font.SysFont("Arial", 34)
 
     # Create the menu screen
     menu = MenuScreen(screen, font)
@@ -209,24 +210,25 @@ if __name__ == "__main__":
     shuriken_image = load_sprite("shuriken.png", (32, 32))
 
     # Create the player, enemy and shuriken speed depending on the difficulty
-    if difficulty == "easy":
-        SHURIKEN_SPEED = 2.5
-        BASE_ENEMY_SPEED = 0.8
-        BASE_ENEMY_HP = 0.8
-        BASE_PLAYER_SPEED = 1.2
-        ENEMY_SPEED_INCREASE = 0.05
-    elif difficulty == "medium":
-        SHURIKEN_SPEED = 2
-        BASE_ENEMY_SPEED = 1
-        BASE_ENEMY_HP = 2
-        BASE_PLAYER_SPEED = 1
-        ENEMY_SPEED_INCREASE = 0.1
-    elif difficulty == "hard":
-        SHURIKEN_SPEED = 2
-        BASE_ENEMY_SPEED = 1.2
-        BASE_ENEMY_HP = 3
-        BASE_PLAYER_SPEED = 1
-        ENEMY_SPEED_INCREASE = 0.15
+    match difficulty:
+        case "easy":
+            SHURIKEN_SPEED = 2.5
+            BASE_ENEMY_SPEED = 0.8
+            BASE_ENEMY_HP = 0.8
+            BASE_PLAYER_SPEED = 1.2
+            ENEMY_SPEED_INCREASE = 0.05
+        case "medium":
+            SHURIKEN_SPEED = 2
+            BASE_ENEMY_SPEED = 1
+            BASE_ENEMY_HP = 2
+            BASE_PLAYER_SPEED = 1
+            ENEMY_SPEED_INCREASE = 0.1
+        case "hard":
+            SHURIKEN_SPEED = 2
+            BASE_ENEMY_SPEED = 1.2
+            BASE_ENEMY_HP = 3
+            BASE_PLAYER_SPEED = 1
+            ENEMY_SPEED_INCREASE = 0.15
     player = Player(x=100, y=WINDOW_HEIGHT / 2,
                     speed=BASE_PLAYER_SPEED,
                     hp=5, image=player_image)
@@ -267,13 +269,14 @@ if __name__ == "__main__":
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                 pygame.image.save(screen,
                                   os.path.join(os.getcwd(), "screenshots",
-                                            f"screenshot_{pygame.time.get_ticks()}.png"))
+                                            f"screenshot_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.png"))
 
         if controls == "keyboard":
             # Check if the player is moved with keyboard
             keys = pygame.key.get_pressed()
-            if any(keys[pygame.K_UP], keys[pygame.K_DOWN], keys[pygame.K_LEFT], keys[pygame.K_RIGHT]):
-                player.update(keys, dt)
+            if any([keys[pygame.K_UP], keys[pygame.K_DOWN],
+                    keys[pygame.K_LEFT], keys[pygame.K_RIGHT]]):
+                player.update_keyboard(keys, dt)
         if controls == "mouse":
             # Check if the player is moved with mouse
             if pygame.mouse.get_pos() != (player.rect.x, player.rect.y):
