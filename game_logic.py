@@ -5,38 +5,19 @@ import os
 import sys
 import random
 from datetime import datetime
-import yaml
 import pygame
+from views.game_ui import GameUI
 from views.menu import menu_loop
 from utils import (
-    GameUI,
+    COLORS,
+    CONFIG,
+    WINDOW_HEIGHT,
+    WINDOW_WIDTH,
     load_sprite,
     load_backgrounds,
     detect_collision,
     screen_init
     )
-
-# Load config.yaml
-with open(os.path.join("config.yaml"), encoding="utf8") as config_file:
-    CONFIG = yaml.load(config_file, Loader=yaml.SafeLoader)
-
-# Define some constants
-try:
-    WINDOW_WIDTH = CONFIG["resolution"]["horizontal"]
-    WINDOW_HEIGHT = CONFIG["resolution"]["vertical"]
-    TITLE = CONFIG["window_title"]
-    FPS = CONFIG["fps"]
-    MAX_LEVEL = CONFIG["max_level"]
-except KeyError as error:
-    print("Error: Missing key in config.yaml:", error)
-    raise SystemExit from error
-
-# Define some colors for later use
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
 
 
 class Player(pygame.sprite.Sprite):
@@ -68,25 +49,25 @@ class Player(pygame.sprite.Sprite):
         self.speed = speed
         self.hp = hp
 
-    def update_keyboard(self, keys: list, _dt: float):
+    def update_keyboard(self, key_list: list, _dt: float):
         """
         Update the player based on keyboard input.
 
         Parameters
         ----------
-        keys : list
+        key_list : list
             The keys that are pressed.
         """
-        if keys[pygame.K_UP]:
+        if key_list[pygame.K_UP]:
             self.rect.y -= self.speed * _dt
             self.image = player_image
-        if keys[pygame.K_DOWN]:
+        if key_list[pygame.K_DOWN]:
             self.rect.y += self.speed * _dt
             self.image = player_image
-        if keys[pygame.K_LEFT]:
+        if key_list[pygame.K_LEFT]:
             self.rect.x -= self.speed * _dt
             self.image = player_side_image
-        if keys[pygame.K_RIGHT]:
+        if key_list[pygame.K_RIGHT]:
             self.rect.x += self.speed * _dt
             self.image = pygame.transform.flip(player_side_image, True, False)
 
@@ -187,8 +168,6 @@ if __name__ == "__main__":
 
     # Set the font
     assets_path = os.path.join(os.getcwd(), "assets")
-    font_path = os.path.join(assets_path, "fonts")
-    font = pygame.font.Font(os.path.join(font_path, "C64_Pro_Mono-STYLE.ttf"), 32)
 
     # Start the menu loop
     diff = {0: "easy", 1: "medium", 2: "hard"}
@@ -203,7 +182,7 @@ if __name__ == "__main__":
     player_image = load_sprite("ninja.png", (96, 96))
     player_side_image = load_sprite("ninja_side.png", (72, 96))
     enemy_image = load_sprite("enemy.png", (96, 96))
-    background_images = load_backgrounds(MAX_LEVEL)
+    background_images = load_backgrounds(CONFIG.max_level)
     background_image = background_images[0]
     shuriken_image = load_sprite("shuriken.png", (32, 32))
 
@@ -250,19 +229,27 @@ if __name__ == "__main__":
     dt = 1
 
     # Create the game UI
-    game_ui = GameUI(screen, font)
+    game_ui = GameUI(screen, CONFIG.ui_font)
     game_ui.draw(player.hp)
 
     # The game loop
     while True:
         # Calculate the time since the last frame
-        dt = clock.tick(FPS) / 5
+        dt = clock.tick(CONFIG.fps) / 5
 
         # Handle events
         for event in pygame.event.get():
-            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+            if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                # Drop back to the pause menu
+                pygame.mouse.set_visible(True)
+                difficulty_marker, controls_marker = menu_loop(paused=True)
+                difficulty = diff[difficulty_marker]
+                print("Difficulty:", difficulty)
+                controls = controller[controls_marker]
+                print("Controls:", controls)
             # Take a screenshot
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                 pygame.image.save(screen,
@@ -307,12 +294,12 @@ if __name__ == "__main__":
 
         # Check if the player is dead
         if player.hp <= 0:
-            screen.fill(BLACK)
-            screen.blit(font.render(
-                "Game Over", True, RED),
+            screen.fill(COLORS.black)
+            screen.blit(CONFIG.main_font.render(
+                "Game Over", True, COLORS.red),
                 (WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 - 50))
-            screen.blit(font.render(
-                f"Score: {old_score}", True, GREEN),
+            screen.blit(CONFIG.main_font.render(
+                f"Score: {old_score}", True, COLORS.green),
                 (WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2))
             pygame.display.update()
             pygame.time.delay(5000)
@@ -387,9 +374,9 @@ if __name__ == "__main__":
             screen.blit(shuriken.image, (shuriken.rect.x, shuriken.rect.y))
 
         # Check if max level is reached
-        if level == MAX_LEVEL:
-            screen.fill(WHITE)
-            game_over_text = font.render("You Win", True, GREEN)
+        if level == CONFIG.max_level:
+            screen.fill(COLORS.white)
+            game_over_text = CONFIG.main_font.render("You Win", True, COLORS.green)
             screen.blit(game_over_text, (WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 - 50))
             pygame.display.update()
             pygame.time.delay(5000)

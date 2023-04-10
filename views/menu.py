@@ -1,9 +1,17 @@
+"""
+The menu view.
+"""
 import sys
-import pygame
 import os
 import logging
-from collections import namedtuple
 from datetime import datetime
+import pygame
+from utils import (
+    COLORS,
+    CONFIG,
+    WINDOW_HEIGHT,
+    WINDOW_WIDTH
+)
 
 # Set the logging level
 logging.basicConfig(filename="game.log", level=logging.DEBUG)
@@ -15,28 +23,15 @@ assets_path = os.path.join(os.getcwd(), "assets")
 # Initialize Pygame
 pygame.init()
 
-# Define screen size
-screen_width = 800
-screen_height = 800
-
-# Define colors
-COLORS = namedtuple("COLORS", "black white red green blue")
-COLORS.black = (0, 0, 0)
-COLORS.white = (255, 255, 255)
-COLORS.red = (255, 0, 0)
-COLORS.green = (0, 255, 0)
-COLORS.blue = (0, 0, 255)
-
 # Set up the display
-screen = pygame.display.set_mode((screen_width, screen_height))
+screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Ninja vs Bakugan")
 
 # Load font
-font_path = os.path.join(assets_path, "fonts", "C64_Pro_Mono-STYLE.ttf")
 font_size = 36
 menu_font_size = 36
-font = pygame.font.Font(font_path, font_size)
-menu_font = pygame.font.Font(font_path, menu_font_size)
+font = pygame.font.Font(CONFIG.paths.main_font, font_size)
+menu_font = pygame.font.Font(CONFIG.paths.main_font, menu_font_size)
 
 # Define option menu settings
 difficulty_setting = 0 # Index of the current difficulty option
@@ -45,36 +40,75 @@ control_setting = 0 # Index of the current control option
 # Define background images
 background_path = os.path.join(assets_path, "backgrounds", "hidden_interior.jpg")
 background = pygame.transform.scale(pygame.image.load(background_path).convert(),
-                                    (screen_width, screen_height))
-options_background = background
+                                    (WINDOW_WIDTH, WINDOW_HEIGHT))
 
 
-# Define create_text function to simplify text creation
-def create_text(text, font_size, color, font_path=font_path):
-    font = pygame.font.Font(font_path, font_size)
+def create_text(text, text_size, color, font_path=CONFIG.paths.main_font):
+    """
+    Create a text surface and rect.
+
+    Parameters
+    ----------
+    text : str
+        The text to display.
+    font_size : int
+        The size of the font.
+    color : tuple
+        The color of the text.
+    font_path : str
+        The path to the font file. Defaults to the global font_path.
+
+    Returns
+    -------
+    text_surface : pygame.SurfaceType
+        The text surface.
+    text_rect : pygame.RectType
+        The text rect.
+    """
+    font = pygame.font.Font(font_path, text_size)
     text_surface = font.render(text, True, color)
     return text_surface, text_surface.get_rect()
 
 
-# Draw the main menu, highlight the hovered option
-def draw_menu(highlighted_option=None):
+def draw_menu(highlighted_option=None, paused=False):
+    """
+    Draw the main menu, highlight the hovered option
+
+    Parameters
+    ----------
+    highlighted_option : int
+        The index of the option to highlight.
+    paused : bool
+        Whether the game is paused or not.
+
+    Returns
+    -------
+    None
+    """
     title_font_size = 48
     screen.blit(background, (0, 0))
     title_surface, title_rect = create_text("Ninja vs Bakugan", title_font_size, COLORS.white)
-    title_rect.center = (screen_width // 2, 40)
+    title_rect.center = (WINDOW_WIDTH // 2, 40)
     screen.blit(title_surface, title_rect)
 
     # Define menu positions
     menu_spacing = 100
-    menu_x = screen_width // 4 - 30
+    menu_x = WINDOW_WIDTH // 4 - 30
     menu_y = 280
 
     # Define menu options
-    menu_options = [
-                    ("START", COLORS.white),
-                    ("OPTIONS", COLORS.white),
-                    ("QUIT", COLORS.white),
-                ]
+    if paused:
+        menu_options = [
+                        ("RESUME", COLORS.white),
+                        ("OPTIONS", COLORS.white),
+                        ("QUIT", COLORS.white),
+                    ]
+    else:
+        menu_options = [
+                        ("START", COLORS.white),
+                        ("OPTIONS", COLORS.white),
+                        ("QUIT", COLORS.white),
+                    ]
     menu_option_rects = []
 
     for i, (text, color) in enumerate(menu_options):
@@ -90,19 +124,36 @@ def draw_menu(highlighted_option=None):
     return menu_option_rects
 
 
-# menu_loop() is the main menu loop
-def menu_loop():
+def menu_loop(paused=False):
+    """
+    The main menu loop.
+
+    Parameters
+    ----------
+    paused : bool
+        Whether the game is paused or not.
+
+    Returns
+    -------
+    None
+    """
     global difficulty_setting
     global control_setting
     menu_running = True
-    menu_option_rects = draw_menu()
+    if paused:
+        menu_option_rects = draw_menu(paused=True)
+    else:
+        menu_option_rects = draw_menu()
 
     while menu_running:
         if pygame.mouse.get_focused():
             mouse_pos = pygame.mouse.get_pos()
             for i, rect in enumerate(menu_option_rects):
                 if rect.collidepoint(mouse_pos):
-                    menu_option_rects = draw_menu(i)
+                    if paused:
+                        menu_option_rects = draw_menu(i, paused=True)
+                    else:
+                        menu_option_rects = draw_menu(i)
         for event in pygame.event.get():
             match event.type:
                 case pygame.QUIT:
@@ -128,7 +179,19 @@ def menu_loop():
     sys.exit()
 
 
-def options_menu_loop():
+def options_menu_loop(paused=False):
+    """
+    The options menu loop.
+
+    Parameters
+    ----------
+    paused : bool
+        Whether the game is paused or not.
+
+    Returns
+    -------
+    None
+    """
     global difficulty_setting
     global control_setting
 
@@ -141,22 +204,37 @@ def options_menu_loop():
 
     # Calculate positions for menu items
     menu_spacing = 50
-    menu_x = screen_width // 3 - 30
+    menu_x = WINDOW_WIDTH // 3 - 30
     menu_y = 300
     option_menu_rects = []
 
     # Render the menu Background and title
     def render_fixed_items():
-        screen.blit(options_background, (0, 0))
+        """Render the menu background and title."""
+        screen.blit(background, (0, 0))
         title_text = "OPTIONS"
         title_text_render = font.render(title_text, True, COLORS.white)
-        title_text_rect = title_text_render.get_rect(center=(screen_width // 2, 100))
+        title_text_rect = title_text_render.get_rect(center=(WINDOW_WIDTH // 2, 100))
         screen.blit(title_text_render, title_text_rect)
 
     # Render the menu items the first time
     render_fixed_items()
 
     def highlight_on_hover(menu_item_idx, selection_idx=None):
+        """
+        Highlight the menu item if the mouse is hovering over it.
+
+        Parameters
+        ----------
+        menu_item_idx : int
+            The index of the menu item.
+        selection_idx : int
+            The index of the selection.
+
+        Returns
+        -------
+        None
+        """
         mouse_pos = pygame.mouse.get_pos()
         if option_menu_rects[menu_item_idx].collidepoint(mouse_pos):
             if menu_item_idx == 2:
@@ -176,6 +254,22 @@ def options_menu_loop():
             pygame.display.update()
 
     def render_options(initial=False, control_setting=None, difficulty_setting=None):
+        """
+        Render the options menu.
+
+        Parameters
+        ----------
+        initial : bool
+            Whether this is the first time the options menu is being rendered.
+        control_setting : str
+            The control setting.
+        difficulty_setting : str
+            The difficulty setting.
+
+        Returns
+        -------
+        None
+        """
         logging.debug(f"Initial: {initial}, Control Setting: {control_setting},\
                       Difficulty Setting: {difficulty_setting}")
         for i, (label, options) in enumerate(option_menu_items):
@@ -273,7 +367,7 @@ def options_menu_loop():
 
                             # Update the selected option
                             if option_menu_items[i] is not None:
-                                
+
                                 render_fixed_items()
                                 render_options(control_setting=control_setting,
                                                difficulty_setting=difficulty_setting)
@@ -321,9 +415,7 @@ def options_menu_loop():
                 pygame.display.update(option_rect)
 
     # Return to main menu
-    draw_menu()
-
-
-# Run the main menu loop
-if __name__ == "__main__":
-    menu_loop()
+    if paused:
+        draw_menu(paused=True)
+    else:
+        draw_menu()
