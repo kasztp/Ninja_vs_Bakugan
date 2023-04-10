@@ -252,9 +252,9 @@ if __name__ == "__main__":
                 print("Controls:", controls)
             # Take a screenshot
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                img_name = f"screenshot_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.png"
                 pygame.image.save(screen,
-                                  os.path.join(os.getcwd(), "screenshots",
-                                            f"screenshot_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.png"))
+                                  os.path.join(CONFIG.paths.screenshots, img_name))
 
         if controls == "keyboard":
             # Check if the player is moved with keyboard
@@ -295,10 +295,10 @@ if __name__ == "__main__":
         # Check if the player is dead
         if player.hp <= 0:
             screen.fill(COLORS.black)
-            screen.blit(CONFIG.main_font.render(
+            screen.blit(CONFIG.ui_font.render(
                 "Game Over", True, COLORS.red),
                 (WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 - 50))
-            screen.blit(CONFIG.main_font.render(
+            screen.blit(CONFIG.ui_font.render(
                 f"Score: {old_score}", True, COLORS.green),
                 (WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2))
             pygame.display.update()
@@ -376,7 +376,7 @@ if __name__ == "__main__":
         # Check if max level is reached
         if level == CONFIG.max_level:
             screen.fill(COLORS.white)
-            game_over_text = CONFIG.main_font.render("You Win", True, COLORS.green)
+            game_over_text = CONFIG.ui_font.render("You Win", True, COLORS.green)
             screen.blit(game_over_text, (WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 - 50))
             pygame.display.update()
             pygame.time.delay(5000)

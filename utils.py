@@ -18,7 +18,7 @@ COLORS.red = (255, 0, 0)
 COLORS.green = (0, 255, 0)
 COLORS.blue = (0, 0, 255)
 
-ConfigPaths = namedtuple("paths", "assets sprites backgrounds ui fonts main_font sounds config")
+ConfigPaths = namedtuple("paths", "assets sprites backgrounds ui fonts main_font sounds screenshots")
 ConfigPaths.assets = os.path.join(os.getcwd(), "assets")
 ConfigPaths.sprites = os.path.join(os.getcwd(), "assets", "sprites")
 ConfigPaths.backgrounds = os.path.join(os.getcwd(), "assets", "backgrounds")
@@ -26,6 +26,7 @@ ConfigPaths.ui = os.path.join(os.getcwd(), "assets", "ui")
 ConfigPaths.fonts = os.path.join(os.getcwd(), "assets", "fonts")
 ConfigPaths.main_font = os.path.join(os.getcwd(), "assets", "fonts", "C64_Pro_Mono-STYLE.ttf")
 ConfigPaths.sounds = os.path.join(os.getcwd(), "assets", "sounds")
+ConfigPaths.screenshots = os.path.join(os.getcwd(), "screenshots")
 
 
 @dataclass(frozen=True)
