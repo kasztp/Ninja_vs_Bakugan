@@ -13,6 +13,12 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 
+# Load font
+assets_path = os.path.join(os.getcwd(), "assets")
+font_path = os.path.join(assets_path, "fonts", "C64_Pro_Mono-STYLE.ttf")
+font_size = 32
+ui_font = pygame.font.Font(font_path, font_size)
+
 # Load config.yaml
 with open(os.path.join("config.yaml"), encoding="utf8") as config_file:
     CONFIG = yaml.load(config_file, Loader=yaml.SafeLoader)
@@ -152,7 +158,7 @@ class GameUI():
     """
     The game UI class.
     """
-    def __init__(self, screen: pygame.SurfaceType, font: pygame.font.FontType):
+    def __init__(self, screen: pygame.SurfaceType, font: pygame.font.FontType = ui_font):
         """
         Initialize the game UI.
 
@@ -189,16 +195,16 @@ class GameUI():
         pygame.draw.rect(self.screen, (139, 69, 19), (0, 0, WINDOW_WIDTH, 50))
 
         # Draw the HP bar
-        self.screen.blit(self.hp_text, (30, 7))
+        self.screen.blit(self.hp_text, (10, 7))
         for i in range(self.max_hp):
             if i < player_hp:
-                self.screen.blit(self.ui_elements["heart_full"], (130 + i * 32, 8))
+                self.screen.blit(self.ui_elements["heart_full"], (90 + i * 32, 8))
             else:
-                self.screen.blit(self.ui_elements["heart_empty"], (130 + i * 32, 8))
+                self.screen.blit(self.ui_elements["heart_empty"], (90 + i * 32, 8))
         # Draw the score
-        self.screen.blit(self.score_text, (WINDOW_WIDTH - 200, 7))
+        self.screen.blit(self.score_text, (WINDOW_WIDTH - 270, 7))
         # Draw the level
-        self.screen.blit(self.level_text, (WINDOW_WIDTH - 400, 7))
+        self.screen.blit(self.level_text, (WINDOW_WIDTH - 520, 7))
 
     def update_score(self, score: int):
         """

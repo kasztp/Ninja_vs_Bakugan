@@ -7,9 +7,9 @@ import random
 from datetime import datetime
 import yaml
 import pygame
+from views.menu import menu_loop
 from utils import (
     GameUI,
-    MenuScreen,
     load_sprite,
     load_backgrounds,
     detect_collision,
@@ -186,16 +186,14 @@ if __name__ == "__main__":
     screen = screen_init("Ninja vs. Bakugan", (WINDOW_WIDTH, WINDOW_HEIGHT))
 
     # Set the font
-    font = pygame.font.SysFont("Arial", 34)
-
-    # Create the menu screen
-    menu = MenuScreen(screen, font)
+    assets_path = os.path.join(os.getcwd(), "assets")
+    font_path = os.path.join(assets_path, "fonts")
+    font = pygame.font.Font(os.path.join(font_path, "C64_Pro_Mono-STYLE.ttf"), 32)
 
     # Start the menu loop
     diff = {0: "easy", 1: "medium", 2: "hard"}
     controller = {0: "mouse", 1: "keyboard"}
-    difficulty_marker, controls_marker = menu.menu_loop()
-    print("Difficulty marker:", difficulty_marker)
+    difficulty_marker, controls_marker = menu_loop()
     difficulty = diff[difficulty_marker]
     print("Difficulty:", difficulty)
     controls = controller[controls_marker]
@@ -292,7 +290,7 @@ if __name__ == "__main__":
             score += 1
             level = score // 10 + 1
             enemy.rect.x = WINDOW_WIDTH
-            enemy.rect.y = random.randint(0, WINDOW_HEIGHT - (50 + 96))
+            enemy.rect.y = random.randint(50, WINDOW_HEIGHT - 96)
             enemy.hp = BASE_ENEMY_HP
             background_image = background_images[level - 1]
 

@@ -15,6 +15,7 @@ Fun fact: The last time I did something similar I was about 8 or 10 years old an
 ---
 ## Asset credits:
 * UI items: Penzilla - https://penzilla.itch.io/basic-gui-bundle
+* Font: https://style64.org/c64-truetype
 * ninja_side - https://www.nicepng.com/maxp/u2w7q8w7q8q8u2u2/
 * ninja - https://www.pngwing.com/en/free-png-njcan
 * enemy - https://www.pngegg.com/en/png-nmwne
