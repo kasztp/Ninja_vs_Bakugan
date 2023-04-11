@@ -122,7 +122,7 @@ def draw_menu(highlighted_option=None, paused=False):
     return menu_option_rects
 
 
-def menu_loop(paused=False):
+def menu_loop(paused=False) -> tuple[int, int]:
     """
     The main menu loop.
 
@@ -133,7 +133,10 @@ def menu_loop(paused=False):
 
     Returns
     -------
-    None
+    difficulty_setting : int
+        The index of the selected difficulty setting.
+    control_setting : int
+        The index of the selected control setting.
     """
     global difficulty_setting
     global control_setting
