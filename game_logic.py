@@ -320,7 +320,6 @@ def game_loop(
             enemy.rect.x = WINDOW_WIDTH
             enemy.rect.y = random.randint(50, WINDOW_HEIGHT - 96)
             enemy.hp = BASE_ENEMY_HP
-            background_image = background_images[level - 1]
 
         # Check for collisions
         if detect_collision(player, enemy):
