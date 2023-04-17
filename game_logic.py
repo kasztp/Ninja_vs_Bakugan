@@ -16,6 +16,7 @@ from utils import (
     load_sprite,
     load_backgrounds,
     detect_collision,
+    check_bounds,
     screen_init,
 )
 
@@ -88,8 +89,21 @@ class Player(pygame.sprite.Sprite):
         else:
             self.image = player_image
 
+        # Update the player's position based on the mouse location.
         self.rect.x = mouse_location[0]
         self.rect.y = mouse_location[1]
+
+        # Check if the player's new location is within the bounds of the screen.
+        # Correct it if not.
+        if not check_bounds(self):
+            if self.rect.x < 0:
+                self.rect.x = 0
+            elif self.rect.x > WINDOW_WIDTH - self.rect.width:
+                self.rect.x = WINDOW_WIDTH - self.rect.width
+            if self.rect.y < 50:
+                self.rect.y = 50
+            elif self.rect.y > WINDOW_HEIGHT - self.rect.height:
+                self.rect.y = WINDOW_HEIGHT - self.rect.height
 
     def draw(self, screen: pygame.SurfaceType):
         """
@@ -137,6 +151,13 @@ class Enemy(pygame.sprite.Sprite):
         """
         Update the enemy.
         """
+        # Check if the enemy is within the bounds of the screen vertically.
+        # If not, correct it.
+        if not check_bounds(self):
+            if self.rect.y < 50:
+                self.rect.y = 50
+            elif self.rect.y > WINDOW_HEIGHT - self.rect.height:
+                self.rect.y = WINDOW_HEIGHT - self.rect.height
         self.rect.x -= self.speed * _dt
 
     def draw(self, screen: pygame.SurfaceType):

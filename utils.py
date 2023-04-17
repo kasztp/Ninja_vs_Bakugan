@@ -180,3 +180,22 @@ def screen_init(title: str, size: tuple) -> pygame.SurfaceType:
     screen = pygame.display.set_mode(size)
     pygame.display.set_caption(title)
     return screen
+
+
+def check_bounds(sprite: pygame.sprite.Sprite) -> bool:
+    """
+    Check if a sprite is within the bounds of the screen.
+
+    Parameters
+    ----------
+    sprite : pygame.sprite.Sprite
+        The sprite to check.
+
+    Returns
+    -------
+    bool
+        Whether or not the sprite is within the bounds of the screen.
+    """
+    x_axis = sprite.rect.x >= 0 and sprite.rect.x <= WINDOW_WIDTH - sprite.rect.width
+    y_axis = sprite.rect.y >= 50 and sprite.rect.y <= WINDOW_HEIGHT - sprite.rect.height
+    return x_axis and y_axis
