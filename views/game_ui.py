@@ -35,7 +35,7 @@ class GameUI:
             "heart_full": load_ui_item("Icon_Small_HeartFull.png", (32, 32)),
             "heart_empty": load_ui_item("Icon_Small_HeartEmpty.png", (32, 32)),
         }
-        self.level_text = self.font.render(f"Level {self.level}", True, COLORS.white)
+        self.level_text = self.font.render(f" LVL {self.level}", True, COLORS.white)
         self.score_text = self.font.render(f"Score {self.score}", True, COLORS.white)
         self.hp_text = self.font.render("HP ", True, COLORS.white)
 
@@ -52,16 +52,16 @@ class GameUI:
         pygame.draw.rect(self.screen, (139, 69, 19), (0, 0, WINDOW_WIDTH, 50))
 
         # Draw the HP bar
-        self.screen.blit(self.hp_text, (10, 7))
+        self.screen.blit(self.hp_text, (10, 9))
         for i in range(self.max_hp):
             if i < player_hp:
                 self.screen.blit(self.ui_elements["heart_full"], (90 + i * 32, 8))
             else:
                 self.screen.blit(self.ui_elements["heart_empty"], (90 + i * 32, 8))
         # Draw the score
-        self.screen.blit(self.score_text, (WINDOW_WIDTH - 270, 7))
+        self.screen.blit(self.score_text, (WINDOW_WIDTH - 270, 9))
         # Draw the level
-        self.screen.blit(self.level_text, (WINDOW_WIDTH - 520, 7))
+        self.screen.blit(self.level_text, (WINDOW_WIDTH - 520, 9))
 
     def update_score(self, score: int):
         """
@@ -85,4 +85,4 @@ class GameUI:
             The new level.
         """
         self.level = level
-        self.level_text = self.font.render(f"Level {self.level}", True, COLORS.white)
+        self.level_text = self.font.render(f" LVL {self.level}", True, COLORS.white)

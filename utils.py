@@ -6,6 +6,7 @@ from collections import namedtuple
 from dataclasses import dataclass
 from typing import NamedTuple
 import pygame
+import yaml
 
 # Initialize Pygame
 pygame.init()
@@ -39,17 +40,28 @@ class Config:
     The game config class.
     """
 
-    resolution: tuple[int, int]
-    window_title: str = "Ninja vs. Bakugan"
+    resolution: tuple[int, int] = 800, 800
     fps: int = 60
     max_level: int = 10
+    window_title: str = "Ninja vs. Bakugan"
     paths: NamedTuple = ConfigPaths
     font_size: int = 32
     ui_font: pygame.font.FontType = pygame.font.Font(paths.main_font, font_size)
 
+    # Load the config file if it exists.
+    if os.path.exists(os.path.join(os.getcwd(), "config.yaml")):
+        with open("config.yaml", "r", encoding="utf8") as config_file:
+            config = yaml.safe_load(config_file)
+            resolution = (
+                config["resolution"]["horizontal"],
+                config["resolution"]["vertical"],
+            )
+            fps = config["fps"]
+            max_level = config["max_level"]
+
 
 # Set the game config
-CONFIG = Config(resolution=(800, 800), window_title="Ninja vs. Bakugan")
+CONFIG = Config(window_title="Ninja vs. Bakugan")
 
 # Define some constants
 WINDOW_WIDTH = CONFIG.resolution[0]

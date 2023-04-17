@@ -8,6 +8,8 @@ from datetime import datetime
 import pygame
 from views.game_ui import GameUI
 from views.menu import menu_loop
+from views.win import win
+from views.lose import lose
 from utils import (
     COLORS,
     CONFIG,
@@ -333,17 +335,7 @@ def game_loop(
 
         # Check if the player is dead
         if player.hp <= 0:
-            screen.fill(COLORS.black)
-            screen.blit(
-                CONFIG.ui_font.render("Game Over", True, COLORS.red),
-                (WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 - 50),
-            )
-            screen.blit(
-                CONFIG.ui_font.render(f"Score: {old_score}", True, COLORS.green),
-                (WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2),
-            )
-            pygame.display.update()
-            pygame.time.delay(3000)
+            lose(screen, old_score)
             pygame.mouse.set_visible(True)
             return None
 
@@ -396,7 +388,6 @@ def game_loop(
                     enemy.hp = BASE_ENEMY_HP
                     score += 2
                     level = score // 10 + 1
-                    background_image = background_images[level - 1]
 
         # Remove the shurikens that collided with the enemy
         if len(shurikens_to_remove) > 0:
@@ -404,11 +395,18 @@ def game_loop(
             for idx in shurikens_to_remove:
                 del shurikens[idx]
 
+        # Check if max level is reached
+        if level > CONFIG.max_level:
+            pygame.event.clear()
+            win(screen, score)
+            return None
+
         # Update UI elements
         game_ui.update_level(level)
         game_ui.update_score(score)
 
         # Draw the background
+        background_image = background_images[level - 1]
         screen.blit(background_image, (0, 0))
 
         # Redraw UI
@@ -423,18 +421,6 @@ def game_loop(
         # Draw the shurikens
         for shuriken in shurikens:
             screen.blit(shuriken.image, (shuriken.rect.x, shuriken.rect.y))
-
-        # Check if max level is reached
-        if level == CONFIG.max_level:
-            screen.fill(COLORS.white)
-            game_over_text = CONFIG.ui_font.render("You Win", True, COLORS.green)
-            screen.blit(
-                game_over_text, (WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 - 50)
-            )
-            pygame.display.update()
-            pygame.time.delay(3000)
-            pygame.mouse.set_visible(True)
-            return None
 
         # Update the screen
         pygame.display.update()
