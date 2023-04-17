@@ -73,6 +73,18 @@ class Player(pygame.sprite.Sprite):
             self.rect.x += self.speed * _dt
             self.image = pygame.transform.flip(player_side_image, True, False)
 
+        # Check if the player's new location is within the bounds of the screen.
+        # Correct it if not.
+        if not check_bounds(self):
+            if self.rect.x < 0:
+                self.rect.x = 0
+            elif self.rect.x > WINDOW_WIDTH - self.rect.width:
+                self.rect.x = WINDOW_WIDTH - self.rect.width
+            if self.rect.y < 50:
+                self.rect.y = 50
+            elif self.rect.y > WINDOW_HEIGHT - self.rect.height:
+                self.rect.y = WINDOW_HEIGHT - self.rect.height
+
     def update_mouse(self, mouse_location: tuple[int, int], _df: float):
         """
         Update the player based on mouse input.
@@ -288,6 +300,7 @@ def game_loop(
                 ]
             ):
                 player.update_keyboard(keys, dt)
+
         if controls == "mouse":
             # Check if the player is moved with mouse
             if pygame.mouse.get_pos() != (player.rect.x, player.rect.y):
@@ -384,6 +397,7 @@ def game_loop(
                     score += 2
                     level = score // 10 + 1
                     background_image = background_images[level - 1]
+
         # Remove the shurikens that collided with the enemy
         if len(shurikens_to_remove) > 0:
             shurikens_to_remove.sort(reverse=True)
