@@ -2,22 +2,20 @@
 The gameplay view.
 """
 import pygame
-from utils import (
-    COLORS,
-    CONFIG,
-    WINDOW_WIDTH,
-    load_ui_item
-)
+from utils import COLORS, CONFIG, WINDOW_WIDTH, load_ui_item
 
 # Initialize Pygame
 pygame.init()
 
 
-class GameUI():
+class GameUI:
     """
     The game UI class.
     """
-    def __init__(self, screen: pygame.SurfaceType, font: pygame.font.FontType = CONFIG.ui_font):
+
+    def __init__(
+        self, screen: pygame.SurfaceType, font: pygame.font.FontType = CONFIG.ui_font
+    ):
         """
         Initialize the game UI.
 
@@ -35,7 +33,7 @@ class GameUI():
         self.max_hp = 5
         self.ui_elements = {
             "heart_full": load_ui_item("Icon_Small_HeartFull.png", (32, 32)),
-            "heart_empty": load_ui_item("Icon_Small_HeartEmpty.png", (32, 32))
+            "heart_empty": load_ui_item("Icon_Small_HeartEmpty.png", (32, 32)),
         }
         self.level_text = self.font.render(f"Level {self.level}", True, COLORS.white)
         self.score_text = self.font.render(f"Score {self.score}", True, COLORS.white)

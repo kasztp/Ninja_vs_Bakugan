@@ -6,12 +6,7 @@ import os
 import logging
 from datetime import datetime
 import pygame
-from utils import (
-    COLORS,
-    CONFIG,
-    WINDOW_HEIGHT,
-    WINDOW_WIDTH
-)
+from utils import COLORS, CONFIG, WINDOW_HEIGHT, WINDOW_WIDTH
 
 # Set the logging level
 logging.basicConfig(filename="game.log", level=logging.DEBUG)
@@ -32,13 +27,14 @@ font_size = 36
 font = pygame.font.Font(CONFIG.paths.main_font, font_size)
 
 # Define option menu settings
-difficulty_setting = 0 # Index of the current difficulty option
-control_setting = 0 # Index of the current control option
+difficulty_setting = 0  # Index of the current difficulty option
+control_setting = 0  # Index of the current control option
 
 # Define background images
 background_path = os.path.join(assets_path, "backgrounds", "hidden_interior.jpg")
-background = pygame.transform.scale(pygame.image.load(background_path).convert(),
-                                    (WINDOW_WIDTH, WINDOW_HEIGHT))
+background = pygame.transform.scale(
+    pygame.image.load(background_path).convert(), (WINDOW_WIDTH, WINDOW_HEIGHT)
+)
 
 
 def create_text(text, text_size, color, font_path=CONFIG.paths.main_font):
@@ -85,7 +81,9 @@ def draw_menu(highlighted_option=None, paused=False):
     """
     title_font_size = 48
     screen.blit(background, (0, 0))
-    title_surface, title_rect = create_text("Ninja vs Bakugan", title_font_size, COLORS.white)
+    title_surface, title_rect = create_text(
+        "Ninja vs Bakugan", title_font_size, COLORS.white
+    )
     title_rect.center = (WINDOW_WIDTH // 2, 40)
     screen.blit(title_surface, title_rect)
 
@@ -97,16 +95,16 @@ def draw_menu(highlighted_option=None, paused=False):
     # Define menu options
     if paused:
         menu_options = [
-                        ("RESUME", COLORS.white),
-                        ("OPTIONS", COLORS.white),
-                        ("QUIT", COLORS.white),
-                    ]
+            ("RESUME", COLORS.white),
+            ("OPTIONS", COLORS.white),
+            ("QUIT", COLORS.white),
+        ]
     else:
         menu_options = [
-                        ("START", COLORS.white),
-                        ("OPTIONS", COLORS.white),
-                        ("QUIT", COLORS.white),
-                    ]
+            ("START", COLORS.white),
+            ("OPTIONS", COLORS.white),
+            ("QUIT", COLORS.white),
+        ]
     menu_option_rects = []
 
     for i, (text, color) in enumerate(menu_options):
@@ -200,7 +198,7 @@ def options_menu_loop(paused=False):
     option_menu_items = [
         ("DIFFICULTY: ", ["EASY", "NORMAL", "HARD"]),
         ("CONTROLS: ", ["MOUSE", "KEYBOARD"]),
-        ("BACK", None)
+        ("BACK", None),
     ]
 
     # Calculate positions for menu items
@@ -239,28 +237,27 @@ def options_menu_loop(paused=False):
         if option_menu_rects[menu_item_idx].collidepoint(mouse_pos):
             if menu_item_idx == 2:
                 option_surface, option_rect = create_text(
-                                                option_menu_items[menu_item_idx][0],
-                                                font_size,
-                                                COLORS.green
-                                                )
-                option_rect.center = (menu_x,
-                                      menu_y + menu_item_idx * menu_spacing)
+                    option_menu_items[menu_item_idx][0], font_size, COLORS.green
+                )
+                option_rect.center = (menu_x, menu_y + menu_item_idx * menu_spacing)
             elif selection_idx is not None:
                 option_surface, option_rect = create_text(
-                                                option_menu_items[menu_item_idx][1][selection_idx],
-                                                font_size,
-                                                COLORS.green
-                                                )
-                option_rect.center = (menu_x + 300,
-                                      menu_y + menu_item_idx * menu_spacing)
+                    option_menu_items[menu_item_idx][1][selection_idx],
+                    font_size,
+                    COLORS.green,
+                )
+                option_rect.center = (
+                    menu_x + 300,
+                    menu_y + menu_item_idx * menu_spacing,
+                )
             else:
                 option_surface, option_rect = create_text(
-                                                option_menu_items[menu_item_idx][1][0],
-                                                font_size,
-                                                COLORS.green
-                                                )
-                option_rect.center = (menu_x + 300,
-                                      menu_y + menu_item_idx * menu_spacing)
+                    option_menu_items[menu_item_idx][1][0], font_size, COLORS.green
+                )
+                option_rect.center = (
+                    menu_x + 300,
+                    menu_y + menu_item_idx * menu_spacing,
+                )
             screen.blit(option_surface, option_rect)
             option_menu_rects[menu_item_idx] = option_rect
             pygame.display.update()
@@ -282,8 +279,10 @@ def options_menu_loop(paused=False):
         -------
         None
         """
-        logging.debug(f"Initial: {initial}, Control Setting: {control_setting},\
-                      Difficulty Setting: {difficulty_setting}")
+        logging.debug(
+            f"Initial: {initial}, Control Setting: {control_setting},\
+                      Difficulty Setting: {difficulty_setting}"
+        )
         for i, (label, options) in enumerate(option_menu_items):
             label_surface, label_rect = create_text(label, font_size, COLORS.white)
             label_rect.center = (menu_x, menu_y + i * menu_spacing)
@@ -291,40 +290,32 @@ def options_menu_loop(paused=False):
             logging.debug(f"Option Label: {label}, Options: {options}")
             if options is not None:
                 if initial:
-                    option_surface, option_rect = create_text(options[0],
-                                                              font_size,
-                                                              COLORS.white
-                                                              )
-                    option_rect.center = (menu_x + 300,
-                                          menu_y + i * menu_spacing)
+                    option_surface, option_rect = create_text(
+                        options[0], font_size, COLORS.white
+                    )
+                    option_rect.center = (menu_x + 300, menu_y + i * menu_spacing)
                     screen.blit(option_surface, option_rect)
                     option_menu_rects.append(option_rect)
                 else:
                     if difficulty_setting is not None and i == 0:
-                        option_surface, option_rect = create_text(options[difficulty_setting],
-                                                                  font_size,
-                                                                  COLORS.white
-                                                                  )
-                        option_rect.center = (menu_x + 300,
-                                              menu_y + i * menu_spacing)
+                        option_surface, option_rect = create_text(
+                            options[difficulty_setting], font_size, COLORS.white
+                        )
+                        option_rect.center = (menu_x + 300, menu_y + i * menu_spacing)
                         screen.blit(option_surface, option_rect)
                         option_menu_rects[i] = option_rect
                     elif control_setting is not None and i == 1:
-                        option_surface, option_rect = create_text(options[control_setting],
-                                                                  font_size,
-                                                                  COLORS.white
-                                                                  )
-                        option_rect.center = (menu_x + 300,
-                                              menu_y + i * menu_spacing)
+                        option_surface, option_rect = create_text(
+                            options[control_setting], font_size, COLORS.white
+                        )
+                        option_rect.center = (menu_x + 300, menu_y + i * menu_spacing)
                         screen.blit(option_surface, option_rect)
                         option_menu_rects[i] = option_rect
                     else:
-                        option_surface, option_rect = create_text(options[0],
-                                                                  font_size,
-                                                                  COLORS.white
-                                                                  )
-                        option_rect.center = (menu_x + 300,
-                                              menu_y + i * menu_spacing)
+                        option_surface, option_rect = create_text(
+                            options[0], font_size, COLORS.white
+                        )
+                        option_rect.center = (menu_x + 300, menu_y + i * menu_spacing)
                         screen.blit(option_surface, option_rect)
                         option_menu_rects[i] = option_rect
             elif initial:
@@ -357,29 +348,39 @@ def options_menu_loop(paused=False):
                                 case 0:
                                     # Toggle difficulty setting
                                     num_difficulties = len(option_menu_items[i][1])
-                                    difficulty_setting = (difficulty_setting + 1) % num_difficulties
-                                    logging.debug(f"Toggled Option Menu Item: \
-                                                  {option_menu_items[difficulty_setting]}")
+                                    difficulty_setting = (
+                                        difficulty_setting + 1
+                                    ) % num_difficulties
+                                    logging.debug(
+                                        f"Toggled Option Menu Item: \
+                                                  {option_menu_items[difficulty_setting]}"
+                                    )
                                     option_surface, option_rect = create_text(
-                                                                    option_menu_items[i][1][difficulty_setting],
-                                                                    font_size,
-                                                                    COLORS.white
-                                                                )
-                                    option_rect.center = (menu_x + 300,
-                                                          menu_y + i * menu_spacing)
+                                        option_menu_items[i][1][difficulty_setting],
+                                        font_size,
+                                        COLORS.white,
+                                    )
+                                    option_rect.center = (
+                                        menu_x + 300,
+                                        menu_y + i * menu_spacing,
+                                    )
                                     option_menu_rects[i] = option_rect
                                 case 1:
                                     # Toggle control setting
                                     num_controls = len(option_menu_items[i][1])
-                                    control_setting = (control_setting + 1) % num_controls
-                                    logging.debug(f"Toggled Option Menu Item: \
-                                                  {option_menu_items[control_setting]}")
+                                    control_setting = (
+                                        control_setting + 1
+                                    ) % num_controls
+                                    logging.debug(
+                                        f"Toggled Option Menu Item: \
+                                                  {option_menu_items[control_setting]}"
+                                    )
                                 case 2:
                                     # Return to main menu
                                     options_menu_running = False
                                     break
 
-                            log_text =f"Len Option Items: {len(option_menu_items)}, \
+                            log_text = f"Len Option Items: {len(option_menu_items)}, \
                                         Len Option Rects: {len(option_menu_rects)}, \
                                         i = {i}, Option Items: {option_menu_items}, \
                                         i = {i}, Option Rects: {option_menu_rects}"
@@ -387,10 +388,11 @@ def options_menu_loop(paused=False):
 
                             # Update the selected option
                             if option_menu_items[i] is not None:
-
                                 render_fixed_items()
-                                render_options(control_setting=control_setting,
-                                               difficulty_setting=difficulty_setting)
+                                render_options(
+                                    control_setting=control_setting,
+                                    difficulty_setting=difficulty_setting,
+                                )
 
                                 screen.blit(option_surface, option_rect)
                                 pygame.display.update(option_rect)
@@ -411,32 +413,29 @@ def options_menu_loop(paused=False):
                 match i:
                     case 0:
                         option_surface, option_rect = create_text(
-                                                        option_menu_items[i][1][difficulty_setting],
-                                                        font_size,
-                                                        COLORS.white
-                                                        )
-                        option_rect.center = (menu_x + 300,
-                                              menu_y + i * menu_spacing)
+                            option_menu_items[i][1][difficulty_setting],
+                            font_size,
+                            COLORS.white,
+                        )
+                        option_rect.center = (menu_x + 300, menu_y + i * menu_spacing)
                     case 1:
                         option_surface, option_rect = create_text(
-                                                        option_menu_items[i][1][control_setting],
-                                                        font_size,
-                                                        COLORS.white
-                                                        )
-                        option_rect.center = (menu_x + 300,
-                                              menu_y + i * menu_spacing)
+                            option_menu_items[i][1][control_setting],
+                            font_size,
+                            COLORS.white,
+                        )
+                        option_rect.center = (menu_x + 300, menu_y + i * menu_spacing)
                     case 2:
                         option_surface, option_rect = create_text(
-                                                        option_menu_items[i][0],
-                                                        font_size,
-                                                        COLORS.white
-                                                        )
-                        option_rect.center = (menu_x,
-                                              menu_y + i * menu_spacing)
+                            option_menu_items[i][0], font_size, COLORS.white
+                        )
+                        option_rect.center = (menu_x, menu_y + i * menu_spacing)
 
                 render_fixed_items()
-                render_options(control_setting=control_setting,
-                               difficulty_setting=difficulty_setting)
+                render_options(
+                    control_setting=control_setting,
+                    difficulty_setting=difficulty_setting,
+                )
                 screen.blit(option_surface, option_rect)
                 pygame.display.update(option_rect)
 

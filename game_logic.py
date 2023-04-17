@@ -16,14 +16,15 @@ from utils import (
     load_sprite,
     load_backgrounds,
     detect_collision,
-    screen_init
-    )
+    screen_init,
+)
 
 
 class Player(pygame.sprite.Sprite):
     """
     The player class.
     """
+
     def __init__(self, x: int, y: int, speed: int, hp: int, image: pygame.SurfaceType):
         """
         Initialize the player.
@@ -89,7 +90,7 @@ class Player(pygame.sprite.Sprite):
 
         self.rect.x = mouse_location[0]
         self.rect.y = mouse_location[1]
-    
+
     def draw(self, screen: pygame.SurfaceType):
         """
         Draw the player.
@@ -106,6 +107,7 @@ class Enemy(pygame.sprite.Sprite):
     """
     The enemy class.
     """
+
     def __init__(self, x: int, y: int, speed: int, hp: int, image: pygame.SurfaceType):
         """
         Initialize the enemy.
@@ -136,7 +138,7 @@ class Enemy(pygame.sprite.Sprite):
         Update the enemy.
         """
         self.rect.x -= self.speed * _dt
-    
+
     def draw(self, screen: pygame.SurfaceType):
         """
         Draw the enemy.
@@ -153,6 +155,7 @@ class Shuriken(pygame.sprite.Sprite):
     """
     The shuriken class.
     """
+
     def __init__(self, x: int, y: int, speed: int, image: pygame.SurfaceType):
         """
         Initialize the shuriken.
@@ -183,12 +186,16 @@ class Shuriken(pygame.sprite.Sprite):
         self.rect.x += self.speed * _dt
 
 
-def game_loop(difficulty: str, controls: str,
-              player: Player, enemy: Enemy,
-              score: int, level: int,
-              background_image: pygame.SurfaceType,
-              game_ui: GameUI
-              ) -> None:
+def game_loop(
+    difficulty: str,
+    controls: str,
+    player: Player,
+    enemy: Enemy,
+    score: int,
+    level: int,
+    background_image: pygame.SurfaceType,
+    game_ui: GameUI,
+) -> None:
     """
     The game loop.
 
@@ -241,15 +248,24 @@ def game_loop(difficulty: str, controls: str,
                 print("Controls:", controls)
             # Take a screenshot
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                img_name = f"screenshot_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.png"
-                pygame.image.save(screen,
-                                  os.path.join(CONFIG.paths.screenshots, img_name))
+                img_name = (
+                    f"screenshot_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.png"
+                )
+                pygame.image.save(
+                    screen, os.path.join(CONFIG.paths.screenshots, img_name)
+                )
 
         if controls == "keyboard":
             # Check if the player is moved with keyboard
             keys = pygame.key.get_pressed()
-            if any([keys[pygame.K_UP], keys[pygame.K_DOWN],
-                    keys[pygame.K_LEFT], keys[pygame.K_RIGHT]]):
+            if any(
+                [
+                    keys[pygame.K_UP],
+                    keys[pygame.K_DOWN],
+                    keys[pygame.K_LEFT],
+                    keys[pygame.K_RIGHT],
+                ]
+            ):
                 player.update_keyboard(keys, dt)
         if controls == "mouse":
             # Check if the player is moved with mouse
@@ -284,12 +300,14 @@ def game_loop(difficulty: str, controls: str,
         # Check if the player is dead
         if player.hp <= 0:
             screen.fill(COLORS.black)
-            screen.blit(CONFIG.ui_font.render(
-                "Game Over", True, COLORS.red),
-                (WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 - 50))
-            screen.blit(CONFIG.ui_font.render(
-                f"Score: {old_score}", True, COLORS.green),
-                (WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2))
+            screen.blit(
+                CONFIG.ui_font.render("Game Over", True, COLORS.red),
+                (WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 - 50),
+            )
+            screen.blit(
+                CONFIG.ui_font.render(f"Score: {old_score}", True, COLORS.green),
+                (WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2),
+            )
             pygame.display.update()
             pygame.time.delay(3000)
             pygame.mouse.set_visible(True)
@@ -300,14 +318,22 @@ def game_loop(difficulty: str, controls: str,
         if controls == "keyboard":
             if keys[pygame.K_SPACE]:
                 if len(shurikens) < 3:
-                    shuriken = Shuriken(x=player.rect.x + 96, y=player.rect.y + 48,
-                                        speed=SHURIKEN_SPEED, image=shuriken_image)
+                    shuriken = Shuriken(
+                        x=player.rect.x + 96,
+                        y=player.rect.y + 48,
+                        speed=SHURIKEN_SPEED,
+                        image=shuriken_image,
+                    )
                     shurikens.append(shuriken)
         if controls == "mouse":
             if pygame.mouse.get_pressed()[0]:
                 if len(shurikens) < 3:
-                    shuriken = Shuriken(x=player.rect.x + 96, y=player.rect.y + 48,
-                                        speed=SHURIKEN_SPEED, image=shuriken_image)
+                    shuriken = Shuriken(
+                        x=player.rect.x + 96,
+                        y=player.rect.y + 48,
+                        speed=SHURIKEN_SPEED,
+                        image=shuriken_image,
+                    )
                     shurikens.append(shuriken)
 
         # Move the shurikens
@@ -367,7 +393,9 @@ def game_loop(difficulty: str, controls: str,
         if level == CONFIG.max_level:
             screen.fill(COLORS.white)
             game_over_text = CONFIG.ui_font.render("You Win", True, COLORS.green)
-            screen.blit(game_over_text, (WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 - 50))
+            screen.blit(
+                game_over_text, (WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 - 50)
+            )
             pygame.display.update()
             pygame.time.delay(3000)
             pygame.mouse.set_visible(True)
@@ -421,11 +449,20 @@ if __name__ == "__main__":
                 BASE_ENEMY_HP = 3
                 BASE_PLAYER_SPEED = 1
                 ENEMY_SPEED_INCREASE = 0.15
-        player = Player(x=100, y=WINDOW_HEIGHT / 2,
-                        speed=BASE_PLAYER_SPEED,
-                        hp=5, image=player_image)
-        enemy = Enemy(x=WINDOW_WIDTH, y=random.randint(0, WINDOW_HEIGHT - 96),
-                    speed=BASE_ENEMY_SPEED, hp=BASE_ENEMY_HP, image=enemy_image)
+        player = Player(
+            x=100,
+            y=WINDOW_HEIGHT / 2,
+            speed=BASE_PLAYER_SPEED,
+            hp=5,
+            image=player_image,
+        )
+        enemy = Enemy(
+            x=WINDOW_WIDTH,
+            y=random.randint(0, WINDOW_HEIGHT - 96),
+            speed=BASE_ENEMY_SPEED,
+            hp=BASE_ENEMY_HP,
+            image=enemy_image,
+        )
 
         if controls == "mouse":
             # Set the mouse position to the player position
@@ -441,9 +478,6 @@ if __name__ == "__main__":
         game_ui.draw(player.hp)
 
         # The game loop
-        game_loop(difficulty, controls,
-                player, enemy,
-                score, level,
-                background_image,
-                game_ui
-                )
+        game_loop(
+            difficulty, controls, player, enemy, score, level, background_image, game_ui
+        )
