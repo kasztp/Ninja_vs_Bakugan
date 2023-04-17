@@ -139,6 +139,8 @@ def menu_loop(paused=False) -> tuple[int, int]:
     global difficulty_setting
     global control_setting
     menu_running = True
+    selected_option = 0
+
     if paused:
         menu_option_rects = draw_menu(paused=True)
     else:
@@ -149,6 +151,7 @@ def menu_loop(paused=False) -> tuple[int, int]:
             mouse_pos = pygame.mouse.get_pos()
             for i, rect in enumerate(menu_option_rects):
                 if rect.collidepoint(mouse_pos):
+                    selected_option = i
                     if paused:
                         menu_option_rects = draw_menu(i, paused=True)
                     else:
@@ -158,8 +161,41 @@ def menu_loop(paused=False) -> tuple[int, int]:
                 case pygame.QUIT:
                     menu_running = False
                 case pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        menu_running = False
+                    match event.key:
+                        case pygame.K_ESCAPE:
+                            menu_running = False
+                        # Keyboard controls for menu:
+                        case pygame.K_UP:
+                            selected_option = (
+                                selected_option - 1 if selected_option > 0 else 2
+                            )
+                            if paused:
+                                menu_option_rects = draw_menu(
+                                    selected_option, paused=True
+                                )
+                            else:
+                                menu_option_rects = draw_menu(selected_option)
+                        case pygame.K_DOWN:
+                            selected_option = (
+                                selected_option + 1 if selected_option < 2 else 0
+                            )
+                            if paused:
+                                menu_option_rects = draw_menu(
+                                    selected_option, paused=True
+                                )
+                            else:
+                                menu_option_rects = draw_menu(selected_option)
+                        case pygame.K_RETURN | pygame.K_SPACE:
+                            match selected_option:
+                                case 0:
+                                    # Start game
+                                    return difficulty_setting, control_setting
+                                case 1:
+                                    # Open options menu
+                                    options_menu_loop()
+                                case 2:
+                                    # Quit game
+                                    menu_running = False
                 case pygame.MOUSEBUTTONDOWN:
                     mouse_pos = pygame.mouse.get_pos()
                     for i, rect in enumerate(menu_option_rects):
@@ -332,14 +368,85 @@ def options_menu_loop(paused=False):
     # and update the option if the user clicks on it.
     # Cycle the option if the user clicks on it again.
     options_menu_running = True
+    current_option = 0
+    pygame.mouse.set_pos(option_menu_rects[current_option].center)
+
     while options_menu_running:
         for event in pygame.event.get():
             match event.type:
                 case pygame.QUIT:
                     options_menu_running = False
                 case pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        options_menu_running = False
+                    match event.key:
+                        case pygame.K_ESCAPE | pygame.K_BACKSPACE:
+                            options_menu_running = False
+                        # Keyboard controls for the options menu
+                        case pygame.K_UP:
+                            if current_option > 0:
+                                current_option -= 1
+                                pygame.mouse.set_pos(
+                                    option_menu_rects[current_option].center
+                                )
+                                highlight_on_hover(current_option)
+                        case pygame.K_DOWN:
+                            if current_option < len(option_menu_items) - 1:
+                                current_option += 1
+                                pygame.mouse.set_pos(
+                                    option_menu_rects[current_option].center
+                                )
+                                highlight_on_hover(current_option)
+                        case pygame.K_RETURN | pygame.K_SPACE:
+                            if current_option == 0:
+                                # Toggle difficulty setting
+                                num_difficulties = len(
+                                    option_menu_items[current_option][1]
+                                )
+                                difficulty_setting = (
+                                    difficulty_setting + 1
+                                ) % num_difficulties
+                                logging.debug(
+                                    f"Toggled Option Menu Item: \
+                                              {option_menu_items[difficulty_setting]}"
+                                )
+                                option_surface, option_rect = create_text(
+                                    option_menu_items[current_option][1][
+                                        difficulty_setting
+                                    ],
+                                    font_size,
+                                    COLORS.green,
+                                )
+                                option_rect.center = (
+                                    menu_x + 300,
+                                    menu_y + current_option * menu_spacing,
+                                )
+                                screen.blit(option_surface, option_rect)
+                                option_menu_rects[current_option] = option_rect
+                                pygame.display.update()
+                            elif current_option == 1:
+                                # Toggle control setting
+                                num_controls = len(option_menu_items[current_option][1])
+                                control_setting = (control_setting + 1) % num_controls
+                                logging.debug(
+                                    f"Toggled Option Menu Item: \
+                                              {option_menu_items[control_setting]}"
+                                )
+                                option_surface, option_rect = create_text(
+                                    option_menu_items[current_option][1][
+                                        control_setting
+                                    ],
+                                    font_size,
+                                    COLORS.green,
+                                )
+                                option_rect.center = (
+                                    menu_x + 300,
+                                    menu_y + current_option * menu_spacing,
+                                )
+                                screen.blit(option_surface, option_rect)
+                                option_menu_rects[current_option] = option_rect
+                                pygame.display.update()
+                            elif current_option == 2:
+                                # Save the settings and return to the main menu
+                                options_menu_running = False
                 case pygame.MOUSEBUTTONDOWN:
                     mouse_pos = pygame.mouse.get_pos()
                     for i, rect in enumerate(option_menu_rects):
