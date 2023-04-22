@@ -1,6 +1,6 @@
 # Ninja_vs_Bakugan [![Pylint](https://github.com/kasztp/Ninja_vs_Bakugan/actions/workflows/pylint.yml/badge.svg)](https://github.com/kasztp/Ninja_vs_Bakugan/actions/workflows/pylint.yml) [![CodeQL](https://github.com/kasztp/Ninja_vs_Bakugan/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/kasztp/Ninja_vs_Bakugan/actions/workflows/github-code-scanning/codeql)
 
-## TLDR: Ninja game where you fight a Bakugan swarm with Shurikens.
+## TLDR: Ninja game where you fight a Bakugan swarm with Shurikens. Demo Video: https://youtu.be/tLu_ct60kQw
 
 ![game sreenshot](https://github.com/kasztp/Ninja_vs_Bakugan/blob/main/screenshots/screenshot_0.png "Game Screenshot")
 
